@@ -1,0 +1,324 @@
+<html>
+<head>
+    <title>Tugas Web Nusantara 2045</title>
+    <style>
+    
+        body {
+            background-color: white; 
+            margin: 0;
+            padding: 50px; 
+        }
+
+        
+        .wadah-hitam {
+            background-color: black; 
+            color: white;           
+            width: 800px;         
+            margin: auto;           
+            padding: 20px;          
+            font-family: Times New Worman;     
+        }
+
+        .banner-merah {
+            background-color: red; 
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+		table {
+            width: 100%;
+            border-collapse: collapse; 
+            background-color: #1a1a1a;
+			border: 1;
+            color: white;
+            font-family: Times New Roman;
+            text-align: center;
+        }
+
+        th, td {
+            border: 1px solid #444;
+            padding: 10px;
+        }
+
+       
+        .kolom-waktu {
+            width: 100px; 
+        }
+
+        .baris-jam {
+            height: 40px; 
+        }
+
+        
+        .header-bg { background-color: #333; }
+        .biru { background-color: #003366; }
+        .merah { background-color: #660000; }
+        .hijau { background-color: #004400; font-weight: bold; }
+        .abu-gelap { background-color: #222; }
+		th{
+		 font-size: 12px;
+		 font-family: Times New Roman
+		}
+		td{
+		 font-size: 11px;
+		 font-family: Times New Roman
+		}
+		
+        .list-kotak {
+            list-style-type: square;
+        }
+		ul, ol {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 5px;
+			font-size: 12px;
+			}
+		.kolom {
+            flex: 1; 
+        }
+		.container {
+            display: flex;
+            justify-content: space-between;
+			gap: 1px;             
+			background-color: black; 
+			color: white;
+			padding: 2px;
+        }
+	
+    </style>
+</head>
+<body>
+
+    <div class="wadah-hitam">
+
+        <div class="banner-merah">
+            🚨 TIKET PRE-SALE "NUSANTARA 2045" DISKON 50% PENAYANGAN PERDANA! 🚨 
+        </div>
+
+        <center>
+            <h1 style="font-size: 25px;">NUSANTARA 2045: KEBANGKITAN ERA BARU</h1> 
+            <p style="font-size: 11px;"><i>Dengarkan Official Soundtrack: "Spektrum Harapan"</i></p> 
+            
+             <audio controls style="width: 35%;">
+                <source src="https://github.com/BK3-Null/Video_S-Library/raw/refs/heads/main/SIENNA_SPIRO_-cut.mp3" type="audio/mpeg">
+            </audio>
+		
+        </center>
+
+        <hr style="border: 1px solid white" width= "90%">
+		<h3>1. Sinopsis Film</h3> 
+        <p style="font-size: 11px; color: white; font-family: 'Times New Roman';">
+            Pada tahun <b>2045</b>, dunia menghadapi krisis energi terbesar dalam sejarah manusia. 
+            Cadangan air (H<sub>2</sub>O) bersih menipis drastis, sementara emisi karbon di atmosfer mencapai angka kritis 10<sup>5</sup> ton per wilayah. 
+            <i>Tim Ekspedisi Garuda</i> yang dipimpin oleh Kapten Arya ditugaskan melakukan perjalanan antar dimensi untuk menemukan <u>Kristal Spektrum Biru</u>. 
+            Apakah masa depan Indonesia bisa diselamatkan? Atau kita hanya akan menjadi catatan sejarah yang terlupakan? 
+        </p>
+
+    <h3>2. Official Trailer </h3>
+	<center>
+    <video width="510" height="300" controls poster="https://github.com/BK3-Null/Video_S-Library/raw/main/Snoopy%20Background%20For%20PC%2C%20A%20Serene%20Snoopy%20Meditating%20On%20A%20Grassy%20Hill%20With%20A%20Breathtaking%20Sun___.jpeg">">
+        <source src="https://github.com/BK3-Null/Video_S-Library/raw/refs/heads/main/The%20Guardian%20of%20Nusantara%20(TRAILER).mp4" type="video/mp4">
+        Browser kamu tidak mendukung video.
+    </video>
+	</center>
+	
+    <h3>3. Informasi Produksi </h3>
+	<div class="container">
+	 <div class="kolom">
+	 <h3 style="font-size: 14px;">Aktor Utama:</h3>
+      <ol>
+                <li>Reza Rahadian (Kapten Arya)</li>
+                <li>Chelsea Islan (Dr. Kirana)</li>
+                <li>Iko Uwais (Komandan Pasukan)</li>
+            </ol>
+        </div>
+
+        <div class="kolom">
+            <h3  style="font-size: 14px;">Penghargaan:</h3>
+            <ul class="list-kotak">
+                <li>Best Visual Effect - Sci-Fi Fest</li>
+                <li>Best Original Soundtrack 2026</li>
+                </ul>
+            </div>
+		</div>
+
+    <h3>4. Jadwal Penayangan & Lokasi Studio </h3>
+    <table>
+        <tr class="header-bg">
+            <th rowspan="2" class="kolom-waktu">WAKTU</th>
+            <th colspan="2">STUDIO REGULER</th>
+            <th rowspan="2" style="width: 200px;">STUDIO IMAX 3D</th>
+        </tr>
+        <tr class="header-bg">
+            <th>Studio 1</th>
+            <th>Studio 2</th>
+        </tr>
+
+        <tr class="baris-jam">
+            <td>13:00 - 15:00</td>
+            <td rowspan="2" class="biru">Nusantara 2045 (Sesi Utama)</td>
+            <td class="abu-gelap">Dokumenter Antariksa</td>
+            <td style="background-color: #3d3d3d;">Maintenance Device</td>
+        </tr>
+
+        <tr class="baris-jam">
+            <td>16:00 - 18:00</td>
+            <td class="abu-gelap">Nusantara 2045 (English Sub)</td>
+            <td rowspan="2" class="merah">Nusantara 2045 (Special Edition)</td>
+        </tr>
+
+        <tr class="baris-jam">
+            <td>19:00 - 21:00</td>
+            <td colspan="2" class="hijau">GALA PREMIERE (GABUNG STUDIO 1 & 2)</td>
+        </tr>
+    </table>
+<div class="form-container">
+    <fieldset>
+        <legend>5. Form Pemesanan Tiket Pre-Sale</legend>
+        
+        <p>Isi formulir di bawah ini untuk memesan kursi Anda secara eksklusif:</p>
+        
+        <form>
+            <table class="form-table">
+                <tr>
+                    <td>Nama Pemesan</td>
+                    <td>: <input type="text" placeholder="Nama Lengkap"></td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>: <input type="email" placeholder="email@domain.com"></td>
+                </tr>
+                <tr>
+                    <td>Kategori Tiket</td>
+                    <td>: 
+                        <input type="radio" name="tiket" id="reg"> <label for="reg">Reguler 2D</label>
+                        <input type="radio" name="tiket" id="imax"> <label for="imax">IMAX 3D</label>
+                        <input type="radio" name="tiket" id="vip"> <label for="vip">Premiere VIP</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Pilih Lokasi</td>
+                    <td>: 
+                        <select>
+                            <option>Jakarta Pusat</option>
+                            <option>Jakarta Utara</option>
+                            <option>Jakarta Selatan</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Pilihan Snack</td>
+                    <td>: 
+                        <input type="checkbox" id="pop"> <label for="pop">Popcorn</label>
+                        <input type="checkbox" id="soda"> <label for="soda">Soda Large</label>
+                        <input type="checkbox" id="nachos"> <label for="nachos">Nachos</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td style="padding-top: 20px;">
+                        <button type="submit">Kirim Pesanan</button>
+                        <button type="reset">Reset Form</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </fieldset>
+</div>
+
+<style>
+    .form-container {
+        background-color: black;
+        color: white;
+        font-family: Times New Roman;
+        padding: 0px;
+        margin-top: 80px;
+    }
+
+    fieldset {
+        border: 1px solid white;
+        padding: 10px;
+    }
+
+    legend {
+       font-family: Times New Roman;
+        padding: 0 10px;
+        font-size: 16px;
+    }
+
+    .form-table {
+        border: none;
+        width: 100%;
+        color: white;
+		background-color: transparent !important;
+    }
+
+    .form-table td {
+        border: none;
+        padding: 8px 5px;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .form-table td:first-child {
+        width: 150px; 
+    }
+
+    input[type="text"], input[type="email"], select {
+        padding: 5px;
+        width: 250px;
+    }
+
+    button {
+        padding: 5px 15px;
+        cursor: pointer;
+        background-color: #eee;
+        border: 1px solid #999;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background-color: #ccc;
+    }
+
+    /* Agar tulisan radio/checkbox sejajar */
+    label {
+        margin-right: 15px;
+        font-size: 0.9em;
+    }
+	.footer-copyright {
+        background-color: black; 
+        color: white;
+        text-align: center; 
+        padding: 40px 0;
+        font-family: 'Times New Roman'; 
+    }
+
+    .footer-copyright p {
+        margin: 5px 0;
+        font-size: 12px;
+    }
+
+    .sub-footer {
+        font-style: italic; 
+        font-size: 10px;
+    }
+    }
+	
+	
+</style>
+<br>
+<hr style="border: 2px solid white" width= "100%">
+   <footer class="footer-copyright">
+    <p>Copyright &copy; 2026 - Studio Nusantara Production</p>
+    <p class="sub-footer">Project Praktikum Pemrograman Web Dasar</p>
+</footer>
+
+
+    </div>
+    </body>
+</html>

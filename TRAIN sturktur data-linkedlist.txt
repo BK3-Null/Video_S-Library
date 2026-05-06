@@ -1,0 +1,253 @@
+- soal 2
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Struktur Data Mahasiswa
+struct Mahasiswa {
+    char nim[15];
+    char nama[50];
+    float uts;
+    float uas;
+    float nilai_akhir;
+    char huruf_mutu;
+    struct Mahasiswa *next;
+};
+
+// Fungsi untuk menentukan Huruf Mutu
+char hitungHurufMutu(float na) {
+    if (na >= 80) return 'A';
+    if (na >= 70) return 'B';
+    if (na >= 55) return 'C';
+    if (na >= 30) return 'D';
+    return 'E';
+}
+
+// Modular: Fungsi Input Data
+void tambahData(struct Mahasiswa **head) {
+    struct Mahasiswa *baru = (struct Mahasiswa*)malloc(sizeof(struct Mahasiswa));
+    
+    printf("\n--- Input Data Mahasiswa ---\n");
+    printf("NIM         : "); scanf("%s", baru->nim);
+    printf("Nama        : "); scanf(" %[^\n]s", baru->nama);
+    printf("Nilai UTS   : "); scanf("%f", &baru->uts);
+    printf("Nilai UAS   : "); scanf("%f", &baru->uas);
+
+    // Hitung Nilai Akhir & Huruf Mutu
+    baru->nilai_akhir = (0.4 * baru->uts) + (0.6 * baru->uas);
+    baru->huruf_mutu = hitungHurufMutu(baru->nilai_akhir);
+    
+    // Masukkan ke Linked List (Tambah di depan)
+    baru->next = *head;
+    *head = baru;
+    printf("Data berhasil disimpan!\n");
+}
+
+// Modular: Fungsi Tampil Data
+void tampilkanData(struct Mahasiswa *head) {
+    printf("\n%-15s %-20s %-10s %-10s %-10s %-5s\n", 
+           "NIM", "Nama", "UTS", "UAS", "Akhir", "Mutu");
+    printf("----------------------------------------------------------------------\n");
+    
+    struct Mahasiswa *temp = head;
+    while (temp != NULL) {
+        printf("%-15s %-20s %-10.2f %-10.2f %-10.2f %-5c\n", 
+               temp->nim, temp->nama, temp->uts, temp->uas, temp->nilai_akhir, temp->huruf_mutu);
+        temp = temp->next;
+    }
+}
+
+int main() {
+    struct Mahasiswa *head = NULL;
+    int pilihan;
+
+    do {
+        printf("\n=== MENU SISTEM NILAI ===\n");
+        printf("1. Tambah Data Mahasiswa\n");
+        printf("2. Tampilkan Semua Data\n");
+        printf("3. Keluar\n");
+        printf("Pilih menu: "); scanf("%d", &pilihan);
+
+        switch(pilihan) {
+            case 1: tambahData(&head); break;
+            case 2: tampilkanData(head); break;
+            case 3: printf("Keluar program...\n"); break;
+            default: printf("Pilihan salah!\n");
+        }
+    } while (pilihan != 3);
+
+    return 0;
+}
+
+
+soal 3
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Struktur Data Parkir
+struct Parkir {
+    char no_plat[10];
+    char nama_pemilik[20];
+    int roda; // 2 atau 4
+    int jam_masuk, menit_masuk;
+    int jam_keluar, menit_keluar;
+    long total_bayar;
+    struct Parkir *next;
+};
+
+// Modular: Fungsi Menghitung Biaya Parkir
+long hitungBiaya(int roda, int jm, int jk) {
+    int durasi = jk - jm;
+    if (durasi <= 0) durasi = 1; // Minimal 1 jam jika keluar di jam yang sama
+
+    long biaya = 0;
+    if (roda == 2) {
+        biaya = 2000; // 2 jam pertama
+        if (durasi > 2) {
+            biaya += (durasi - 2) * 1000;
+        }
+    } else if (roda == 4) {
+        biaya = 3000; // 2 jam pertama
+        if (durasi > 2) {
+            biaya += (durasi - 2) * 2000;
+        }
+    }
+    return biaya;
+}
+
+// Modular: Fungsi Input Kendaraan Masuk
+void kendaraanMasuk(struct Parkir **head) {
+    struct Parkir *baru = (struct Parkir*)malloc(sizeof(struct Parkir));
+    
+    printf("\n--- Input Kendaraan Masuk ---\n");
+    printf("No Kendaraan (6 Karakter): "); scanf("%s", baru->no_plat);
+    printf("Nama Pemilik (15 Karakter): "); scanf(" %[^\n]s", baru->nama_pemilik);
+    printf("Jenis Roda (2/4): "); scanf("%d", &baru->roda);
+    printf("Jam Masuk (0-23): "); scanf("%d", &baru->jam_masuk);
+    printf("Menit Masuk (0-59): "); scanf("%d", &baru->menit_masuk);
+
+    // Default nilai keluar diisi 0 dulu
+    baru->jam_keluar = 0;
+    baru->total_bayar = 0;
+
+    // Masukkan ke Linked List
+    baru->next = *head;
+    *head = baru;
+    printf("Data Kendaraan Berhasil Dicatat!\n");
+}
+
+// Modular: Fungsi Pembayaran (Update data keluar)
+void bayarParkir(struct Parkir *head) {
+    char cari_plat[10];
+    printf("\nMasukkan No Plat untuk Keluar: "); scanf("%s", cari_plat);
+
+    struct Parkir *temp = head;
+    while (temp != NULL) {
+        if (strcmp(temp->no_plat, cari_plat) == 0) {
+            printf("Jam Keluar: "); scanf("%d", &temp->jam_keluar);
+            printf("Menit Keluar: "); scanf("%d", &temp->menit_keluar);
+            
+            temp->total_bayar = hitungBiaya(temp->roda, temp->jam_masuk, temp->jam_keluar);
+            
+            printf("\n--- STRUK PEMBAYARAN ---\n");
+            printf("Nama Pemilik : %s\n", temp->nama_pemilik);
+            printf("Durasi       : %d jam\n", (temp->jam_keluar - temp->jam_masuk));
+            printf("Total Bayar  : Rp %ld\n", temp->total_bayar);
+            return;
+        }
+        temp = temp->next;
+    }
+    printf("Data Kendaraan Tidak Ditemukan!\n");
+}
+
+int main() {
+    struct Parkir *head = NULL;
+    int pilihan;
+
+    do {
+        printf("\n=== MALL KOTA BANDUNG - SISTEM PARKIR ===\n");
+        printf("1. Kendaraan Masuk\n");
+        printf("2. Pembayaran (Keluar)\n");
+        printf("3. Keluar Program\n");
+        printf("Pilih menu: "); scanf("%d", &pilihan);
+
+        switch(pilihan) {
+            case 1: kendaraanMasuk(&head); break;
+            case 2: bayarParkir(head); break;
+            case 3: break;
+            default: printf("Pilihan tidak tersedia.\n");
+        }
+    } while (pilihan != 3);
+
+    return 0;
+}
+
+- Kode Program: Input PIN/Kode Secara Acak (Sorted Insert)
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int pin;
+    struct Node* next;
+};
+
+// Fungsi Modular: Memasukkan PIN secara acak/tidak berurutan
+// Tapi otomatis tersusun rapi di memori menggunakan pointer
+void insertAcak(struct Node** head, int pinBaru) {
+    struct Node* baru = (struct Node*)malloc(sizeof(struct Node));
+    baru->pin = pinBaru;
+    baru->next = NULL;
+
+    struct Node* current;
+
+    // Skenario 1: Jika list kosong atau PIN baru lebih kecil dari head
+    if (*head == NULL || (*head)->pin >= baru->pin) {
+        baru->next = *head;
+        *head = baru;
+    } 
+    else {
+        // Skenario 2: Cari posisi yang tepat di tengah atau di akhir
+        current = *head;
+        while (current->next != NULL && current->next->pin < baru->pin) {
+            current = current->next;
+        }
+        // "Memutus" rantai pointer dan menyisipkan node baru
+        baru->next = current->next;
+        current->next = baru;
+    }
+    printf("PIN %d berhasil dimasukkan ke posisi yang tepat.\n", pinBaru);
+}
+
+void tampilkanList(struct Node* node) {
+    printf("\nIsi Linked List (Otomatis Terurut): ");
+    while (node != NULL) {
+        printf("%d -> ", node->pin);
+        node = node->next;
+    }
+    printf("NULL\n");
+}
+
+int main() {
+    struct Node* head = NULL;
+    int pilihan, kode;
+
+    do {
+        printf("\n1. Masukkan Kode/PIN (Acak)");
+        printf("\n2. Lihat Urutan Data");
+        printf("\n3. Keluar");
+        printf("\nPilih: "); scanf("%d", &pilihan);
+
+        if (pilihan == 1) {
+            printf("Masukkan angka: "); scanf("%d", &kode);
+            insertAcak(&head, kode);
+        } else if (pilihan == 2) {
+            tampilkanList(head);
+        }
+    } while (pilihan != 3);
+
+    return 0;
+}
+

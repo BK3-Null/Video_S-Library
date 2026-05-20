@@ -1,0 +1,148 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Struktur Data Buku
+struct Buku {
+    char kode[10];
+    char judul[50];
+    char pengarang[30];
+    char penerbit[30];
+    int tahun;
+    int jumlah;
+    struct Buku *next;
+};
+
+// --- MODUL: TAMBAH BUKU (LIFO / Insert First) ---
+void tambahBuku(struct Buku **head) {
+    struct Buku *baru = (struct Buku*)malloc(sizeof(struct Buku));
+    
+    printf("\n--- Input Buku Baru ---\n");
+    printf("Kode Buku     : "); scanf("%s", baru->kode);
+    printf("Judul Buku    : "); scanf(" %[^\n]s", baru->judul);
+    printf("Pengarang     : "); scanf(" %[^\n]s", baru->pengarang);
+    printf("Penerbit      : "); scanf(" %[^\n]s", baru->penerbit);
+    printf("Tahun Terbit  : "); scanf("%d", &baru->tahun);
+    printf("Jumlah Buku   : "); scanf("%d", &baru->jumlah);
+
+    // Konsep LIFO: Data baru selalu jadi head
+    baru->next = *head;
+    *head = baru;
+    
+    printf("Buku berhasil dicatat ke sistem!\n");
+}
+
+// --- MODUL: TAMPILKAN SEMUA BUKU ---
+void tampilkanSemua(struct Buku *head) {
+    if (head == NULL) {
+        printf("\nPerpustakaan kosong!\n");
+        return;
+    }
+
+    struct Buku *temp = head;
+    int totalBuku = 0;
+    
+    printf("\n%-10s %-20s %-15s %-10s %-8s\n", "KODE", "JUDUL", "PENGARANG", "TAHUN", "STOK");
+    printf("----------------------------------------------------------------------\n");
+    
+    while (temp != NULL) {
+        printf("%-10s %-20s %-15s %-10d %-8d\n", 
+               temp->kode, temp->judul, temp->pengarang, temp->tahun, temp->jumlah);
+        totalBuku += temp->jumlah;
+        temp = temp->next;
+    }
+    printf("----------------------------------------------------------------------\n");
+    printf("Total Keseluruhan Jumlah Buku: %d\n", totalBuku);
+}
+
+// --- MODUL: CARI BUKU ---
+void cariBuku(struct Buku *head) {
+    char cariJudul[50];
+    printf("\nMasukkan Judul Buku yang dicari: "); scanf(" %[^\n]s", cariJudul);
+
+    struct Buku *temp = head;
+    while (temp != NULL) {
+        if (strcasecmp(temp->judul, cariJudul) == 0) {
+            printf("\nData Ditemukan!\nKode: %s\nPengarang: %s\nPenerbit: %s\n", 
+                   temp->kode, temp->pengarang, temp->penerbit);
+            return;
+        }
+        temp = temp->next;
+    }
+    printf("Maaf, buku tidak ditemukan.\n");
+}
+
+// --- MODUL: EDIT BUKU ---
+void editBuku(struct Buku *head) {
+    char kodeCari[10];
+    printf("\nMasukkan Kode Buku yang akan diedit: "); scanf("%s", kodeCari);
+
+    struct Buku *temp = head;
+    while (temp != NULL) {
+        if (strcmp(temp->kode, kodeCari) == 0) {
+            printf("Ubah Tahun Terbit: "); scanf("%d", &temp->tahun);
+            printf("Ubah Jumlah Stok : "); scanf("%d", &temp->jumlah);
+            printf("Data berhasil diperbarui!\n");
+            return;
+        }
+        temp = temp->next;
+    }
+    printf("Kode buku tidak terdaftar.\n");
+}
+
+// --- MODUL: HAPUS BUKU ---
+void hapusBuku(struct Buku **head) {
+    char kodeHapus[10];
+    printf("\nMasukkan Kode Buku yang akan dihapus: "); scanf("%s", kodeHapus);
+
+    struct Buku *temp = *head, *prev;
+
+    if (temp != NULL && strcmp(temp->kode, kodeHapus) == 0) {
+        *head = temp->next;
+        free(temp);
+        printf("Buku berhasil dihapus.\n");
+        return;
+    }
+
+    while (temp != NULL && strcmp(temp->kode, kodeHapus) != 0) {
+        prev = temp;
+        temp = temp->next;
+    }
+
+    if (temp == NULL) {
+        printf("Buku tidak ditemukan.\n");
+        return;
+    }
+
+    prev->next = temp->next;
+    free(temp);
+    printf("Buku berhasil dihapus.\n");
+}
+
+int main() {
+    struct Buku *perpustakaan = NULL;
+    int pilih;
+
+    do {
+        printf("\n=== MENU SIRKULASI PERPUSTAKAAN (LIFO) ===\n");
+        printf("1. Catat Buku Baru\n");
+        printf("2. Tampilkan Seluruh Buku\n");
+        printf("3. Cari Judul Buku\n");
+        printf("4. Edit Data Buku\n");
+        printf("5. Hapus Judul Buku\n");
+        printf("6. Keluar\n");
+        printf("Pilih Menu: "); scanf("%d", &pilih);
+
+        switch(pilih) {
+            case 1: tambahBuku(&perpustakaan); break;
+            case 2: tampilkanSemua(perpustakaan); break;
+            case 3: cariBuku(perpustakaan); break;
+            case 4: editBuku(perpustakaan); break;
+            case 5: hapusBuku(&perpustakaan); break;
+            case 6: printf("Program Selesai. Terima kasih!\n"); break;
+            default: printf("Pilihan tidak valid!\n");
+        }
+    } while (pilih != 6);
+
+    return 0;
+}

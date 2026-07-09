@@ -33,7 +33,7 @@ int main() {
     
     do {
         system("cls"); // Membersihkan layar console
-        printf("=== PROGRAM APLIKASI KEUANGAN KELUARGA (VERSI FILE TXT) ===\n");
+        printf("=== PROGRAM APLIKASI KEUANGAN KELUARGA (VERSI FILE DAT) ===\n");
         printf("1. Mencatat Data Penerimaan / Pengeluaran\n");
         printf("2. Menampilkan Detail Laporan Penerimaan (Harian/Bulanan)\n");
         printf("3. Menampilkan Detail Laporan Pengeluaran (Harian/Bulanan)\n");
@@ -64,18 +64,11 @@ int main() {
     return 0;
 }
 
-// 1. Fungsi mencatat data penerimaan/pengeluaran ke file TXT
+// 1. Fungsi untuk mencatat data penerimaan atau pengeluaran ke file .dat
 void catatData() {
     FILE *pf;
     struct Transaksi t;
     char ulang;
-    
-    // Membuka file txt dengan mode "a" (append text)
-    if ((pf = fopen("KEUANGAN.txt", "a")) == NULL) {
-        printf("\nFile data tidak dapat dibuka/dibuat!\n");
-        getch();
-        return;
-    }
     
     do {
         system("cls");
@@ -84,18 +77,21 @@ void catatData() {
         printf("Masukkan No Catatan Transaksi: ");
         scanf("%d", &t.no_catatan);
         
+        // Validasi keunikan No Catatan
         if (cekNoCatatan(t.no_catatan)) {
-            printf("Error: No Catatan Transaksi %d sudah ada!\n", t.no_catatan);
+            printf("Error: No Catatan Transaksi %d sudah ada! Gunakan nomor lain.\n", t.no_catatan);
             printf("\nMau memasukkan data lagi (Y/T)? ");
-            ulang = getche();
+            ulang = getch();
             continue;
         }
         
         printf("Masukkan Tanggal (DD MM YYYY) misal 15 07 2026: ");
         scanf("%d %d %d", &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun);
         
+        // --- SOLUSI ERROR ENTER: Membersihkan sisa buffer enter (\n) dari scanf sebelumnya ---
+        while ((getchar()) != '\n');
+        
         printf("Masukkan Uraian/Keterangan   : ");
-        fflush(stdin); 
         gets(t.uraian);
         
         do {
@@ -106,31 +102,35 @@ void catatData() {
         printf("Masukkan Nominal (Rp)         : ");
         scanf("%lf", &t.nominal);
         
-        // Menyimpan ke file teks dengan format terstruktur agar mudah dibaca kembali oleh program
-        fprintf(pf, "%d;%d;%d;%d;%s;%d;%.2f\n", 
-                t.no_catatan, t.tgl.hari, t.tgl.bulan, t.tgl.tahun, t.uraian, t.jenis, t.nominal);
-                
-        printf("\nData berhasil disimpan ke file KEUANGAN.txt!");
+        // Membuka file biner untuk append data
+        if ((pf = fopen("KEUANGAN.DAT", "ab")) == NULL) {
+            printf("\nFile data tidak dapat dibuka/dibuat!\n");
+            getch();
+            return;
+        }
+        
+        // Menulis data struct utuh ke file .dat
+        fwrite(&t, sizeof(struct Transaksi), 1, pf);
+        fclose(pf);
+        
+        printf("\nData berhasil disimpan ke KEUANGAN.DAT!");
         
         printf("\nMau memasukkan data lagi (Y/T)? ");
-        ulang = getche();
+        ulang = getch(); // Menggunakan getch() agar tidak perlu menekan enter lagi setelah pilih Y/T
     } while (ulang == 'Y' || ulang == 'y');
-    
-    fclose(pf);
 }
 
-// Fungsi pembantu mengecek keunikan ID di file TXT
+// Fungsi pembantu untuk memeriksa apakah No Catatan sudah ada di file .dat
 int cekNoCatatan(int no) {
     FILE *pf;
     struct Transaksi t;
     int ditemukan = 0;
     
-    if ((pf = fopen("KEUANGAN.txt", "r")) == NULL) {
-        return 0;
+    if ((pf = fopen("KEUANGAN.DAT", "rb")) == NULL) {
+        return 0; 
     }
     
-    while (fscanf(pf, "%d;%d;%d;%d;[^;];%d;%lf\n", 
-                  &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+    while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
         if (t.no_catatan == no) {
             ditemukan = 1;
             break;
@@ -144,12 +144,12 @@ int cekNoCatatan(int no) {
 void laporanPenerimaan() {
     FILE *pf;
     struct Transaksi t;
-    int mode, i, j, adaData, sudahTampil;
+    int mode, i, sudahTampil;
     int tglUnik[500][3]; // Tampung tanggal unik [hari, bulan, tahun]
     int jmlTgl = 0;
     double totalPeriode, totalSemua = 0;
     
-    if ((pf = fopen("KEUANGAN.txt", "r")) == NULL) {
+    if ((pf = fopen("KEUANGAN.DAT", "rb")) == NULL) {
         printf("\nBelum ada data keuangan yang tercatat.\n");
         getch();
         return;
@@ -168,8 +168,8 @@ void laporanPenerimaan() {
         printf("             LAPORAN PENERIMAAN HARIAN (SEMUA DATA)              \n");
         printf("=================================================================\n");
         
-        // Step 1: Cari semua tanggal unik dari file
-        while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+        // Cari semua tanggal unik dari file biner
+        while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
             if (t.jenis == 1) {
                 sudahTampil = 0;
                 for (i = 0; i < jmlTgl; i++) {
@@ -186,7 +186,6 @@ void laporanPenerimaan() {
             }
         }
         
-        // Step 2: Cetak data per tanggal tersebut
         if (jmlTgl == 0) printf("  [ Tidak ada data penerimaan ]\n");
         for (i = 0; i < jmlTgl; i++) {
             printf("\nTanggal: %02d-%02d-%d\n", tglUnik[i][0], tglUnik[i][1], tglUnik[i][2]);
@@ -195,7 +194,7 @@ void laporanPenerimaan() {
             printf("-----------------------------------------------------------------\n");
             totalPeriode = 0;
             rewind(pf); // Kembalikan pointer file ke awal
-            while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+            while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
                 if (t.jenis == 1 && t.tgl.hari == tglUnik[i][0] && t.tgl.bulan == tglUnik[i][1] && t.tgl.tahun == tglUnik[i][2]) {
                     printf("%-7d | %-30s | Rp %14.2f\n", t.no_catatan, t.uraian, t.nominal);
                     totalPeriode += t.nominal;
@@ -213,7 +212,7 @@ void laporanPenerimaan() {
         printf("=================================================================\n");
         
         // Cari semua Bulan-Tahun unik
-        while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+        while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
             if (t.jenis == 1) {
                 sudahTampil = 0;
                 for (i = 0; i < jmlTgl; i++) {
@@ -237,7 +236,7 @@ void laporanPenerimaan() {
             printf("-----------------------------------------------------------------\n");
             totalPeriode = 0;
             rewind(pf);
-            while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+            while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
                 if (t.jenis == 1 && t.tgl.bulan == tglUnik[i][1] && t.tgl.tahun == tglUnik[i][2]) {
                     printf("%-7d | %02d-%02d-%d | %-25s | Rp %12.2f\n", t.no_catatan, t.tgl.hari, t.tgl.bulan, t.tgl.tahun, t.uraian, t.nominal);
                     totalPeriode += t.nominal;
@@ -259,12 +258,12 @@ void laporanPenerimaan() {
 void laporanPengeluaran() {
     FILE *pf;
     struct Transaksi t;
-    int mode, i, j, adaData, sudahTampil;
+    int mode, i, sudahTampil;
     int tglUnik[500][3];
     int jmlTgl = 0;
     double totalPeriode, totalSemua = 0;
     
-    if ((pf = fopen("KEUANGAN.txt", "r")) == NULL) {
+    if ((pf = fopen("KEUANGAN.DAT", "rb")) == NULL) {
         printf("\nBelum ada data keuangan yang tercatat.\n");
         getch();
         return;
@@ -283,7 +282,7 @@ void laporanPengeluaran() {
         printf("             LAPORAN PENGELUARAN HARIAN (SEMUA DATA)             \n");
         printf("=================================================================\n");
         
-        while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+        while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
             if (t.jenis == 2) {
                 sudahTampil = 0;
                 for (i = 0; i < jmlTgl; i++) {
@@ -308,7 +307,7 @@ void laporanPengeluaran() {
             printf("-----------------------------------------------------------------\n");
             totalPeriode = 0;
             rewind(pf);
-            while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+            while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
                 if (t.jenis == 2 && t.tgl.hari == tglUnik[i][0] && t.tgl.bulan == tglUnik[i][1] && t.tgl.tahun == tglUnik[i][2]) {
                     printf("%-7d | %-30s | Rp %14.2f\n", t.no_catatan, t.uraian, t.nominal);
                     totalPeriode += t.nominal;
@@ -325,7 +324,7 @@ void laporanPengeluaran() {
         printf("             LAPORAN PENGELUARAN BULANAN (SEMUA DATA)            \n");
         printf("=================================================================\n");
         
-        while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+        while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
             if (t.jenis == 2) {
                 sudahTampil = 0;
                 for (i = 0; i < jmlTgl; i++) {
@@ -349,7 +348,7 @@ void laporanPengeluaran() {
             printf("-----------------------------------------------------------------\n");
             totalPeriode = 0;
             rewind(pf);
-            while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+            while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
                 if (t.jenis == 2 && t.tgl.bulan == tglUnik[i][1] && t.tgl.tahun == tglUnik[i][2]) {
                     printf("%-7d | %02d-%02d-%d | %-25s | Rp %12.2f\n", t.no_catatan, t.tgl.hari, t.tgl.bulan, t.tgl.tahun, t.uraian, t.nominal);
                     totalPeriode += t.nominal;
@@ -373,11 +372,11 @@ void penerimaanTerbesar() {
     struct Transaksi t, listMaks[100];
     int blnTglUnik[100][2], jmlBulan = 0, i, idx;
     
-    if ((pf = fopen("KEUANGAN.txt", "r")) == NULL) {
+    if ((pf = fopen("KEUANGAN.DAT", "rb")) == NULL) {
         printf("\nBelum ada data keuangan yang tercatat.\n"); getch(); return;
     }
     
-    while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+    while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
         if (t.jenis == 1) {
             idx = -1;
             for (i = 0; i < jmlBulan; i++) {
@@ -404,6 +403,7 @@ void penerimaanTerbesar() {
                listMaks[i].no_catatan, listMaks[i].tgl.hari, listMaks[i].tgl.bulan, listMaks[i].tgl.tahun, listMaks[i].uraian, listMaks[i].nominal);
         printf("-----------------------------------------------------------------\n");
     }
+    printf("\nTekan tombol apa saja untuk kembali...");
     getch();
 }
 
@@ -413,11 +413,11 @@ void pengeluaranTerbesar() {
     struct Transaksi t, listMaks[100];
     int blnTglUnik[100][2], jmlBulan = 0, i, idx;
     
-    if ((pf = fopen("KEUANGAN.txt", "r")) == NULL) {
+    if ((pf = fopen("KEUANGAN.DAT", "rb")) == NULL) {
         printf("\nBelum ada data keuangan yang tercatat.\n"); getch(); return;
     }
     
-    while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+    while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
         if (t.jenis == 2) {
             idx = -1;
             for (i = 0; i < jmlBulan; i++) {
@@ -444,50 +444,46 @@ void pengeluaranTerbesar() {
                listMaks[i].no_catatan, listMaks[i].tgl.hari, listMaks[i].tgl.bulan, listMaks[i].tgl.tahun, listMaks[i].uraian, listMaks[i].nominal);
         printf("-----------------------------------------------------------------\n");
     }
+    printf("\nTekan tombol apa saja untuk kembali...");
     getch();
 }
 
-// 6. Mengedit item data nominal di dalam file TXT
+// 6. Mengedit nominal dengan teknik Random Access File (fseek) pada file .dat
 void editNominal() {
-    FILE *pf, *pTemp;
+    FILE *pf;
     struct Transaksi t;
     int no_cari, ditemukan = 0;
     double nominal_baru;
     
-    if ((pf = fopen("KEUANGAN.txt", "r")) == NULL) {
+    if ((pf = fopen("KEUANGAN.DAT", "r+b")) == NULL) {
         printf("\nBelum ada data keuangan yang tercatat.\n"); getch(); return;
     }
-    
-    // Gunakan file temporary untuk menulis ulang data modifikasi karena ini file TXT
-    pTemp = fopen("TEMP.txt", "w");
     
     system("cls");
     printf("--- EDIT NOMINAL DATA TRANSAKSI ---\n");
     printf("Masukkan Nomor Catatan Transaksi yang ingin diedit: ");
     scanf("%d", &no_cari);
     
-    while (fscanf(pf, "%d;%d;%d;%d;%[^;];%d;%lf\n", &t.no_catatan, &t.tgl.hari, &t.tgl.bulan, &t.tgl.tahun, t.uraian, &t.jenis, &t.nominal) != EOF) {
+    while (fread(&t, sizeof(struct Transaksi), 1, pf) == 1) {
         if (t.no_catatan == no_cari) {
             ditemukan = 1;
-            printf("\nData Ditemukan: %s | Nominal Lama: Rp %.2f\n", t.uraian, t.nominal);
+            printf("\nData Lama Ditemukan: %s | Nominal Lama: Rp %.2f\n", t.uraian, t.nominal);
             printf("Masukkan Nominal Baru (Rp): ");
             scanf("%lf", &nominal_baru);
             t.nominal = nominal_baru;
+            
+            // Mundurkan pointer file 1 struct ke belakang untuk menimpa record yang sedang dibaca
+            fseek(pf, -sizeof(struct Transaksi), SEEK_CUR);
+            fwrite(&t, sizeof(struct Transaksi), 1, pf);
+            break;
         }
-        // Tulis data (baik yang diubah atau yang tetap) ke file temp
-        fprintf(pTemp, "%d;%d;%d;%d;%s;%d;%.2f\n", t.no_catatan, t.tgl.hari, t.tgl.bulan, t.tgl.tahun, t.uraian, t.jenis, t.nominal);
     }
     
     fclose(pf);
-    fclose(pTemp);
     
-    // Ganti file asli dengan file temporary yang sudah diperbarui
-    remove("KEUANGAN.txt");
-    rename("TEMP.txt", "KEUANGAN.txt");
-    
-    if (ditemukan) printf("\nNominal berhasil diperbarui di file TXT!\n");
+    if (ditemukan) printf("\nNominal berhasil diperbarui di file biner KEUANGAN.DAT!\n");
     else printf("\nNomor catatan tidak ditemukan...\n");
     
-    printf("\nTekan tombol apa saja untuk kembali...");
+    printf("\nTekan tombol apa saja untuk kembali ke menu utama...");
     getch();
 }

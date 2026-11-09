@@ -1,0 +1,321 @@
+<?php
+session_start();
+
+// Jika sudah login, langsung arahkan ke dashboard
+if (isset($_SESSION['username'])) {
+    header("Location: dashboard.php");
+    exit;
+}
+
+// Data pengguna disimpan dalam array PHP (minimal 1 pengguna)
+$users = [
+    [
+        'username' => 'petugas',
+        'password' => '12345',
+        'nama'     => 'Budi Santoso'
+    ],
+    [
+        'username' => 'admin',
+        'password' => 'admin123',
+        'nama'     => 'Rayen'
+    ]
+];
+
+$error_message = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username_input = trim($_POST['username'] ?? '');
+    $password_input = trim($_POST['password'] ?? '');
+
+    $login_success = false;
+
+    foreach ($users as $user) {
+        if ($user['username'] === $username_input && $user['password'] === $password_input) {
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['nama']     = $user['nama'];
+            $login_success = true;
+            break;
+        }
+    }
+
+    if ($login_success) {
+        header("Location: dashboard.php");
+        exit;
+    } else {
+        $error_message = "Username atau password salah";
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Halaman Login - Rekap Penjualan Kantin</title>
+</head>
+<body>
+    <h2>Halaman Login</h2>
+
+    <?php if (!empty($error_message)): ?>
+        <p style="color: red;"><?php echo htmlspecialchars($error_message); ?></p>
+    <?php endif; ?>
+
+    <form action="login.php" method="POST">
+        <div>
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <br>
+        <div>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+
+<?php
+session_start();
+
+// Proteksi halaman menggunakan session
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Rekap Penjualan Kantin</title>
+</head>
+<body>
+    <h2>Selamat datang, <?php echo htmlspecialchars($_SESSION['nama']); ?></h2>
+
+    <nav>
+        <ul>
+            <li><a href="penjualan.php">Input Penjualan Kantin</a></li>
+            <li><a href="logout.php">Logout</a></li>
+        </ul>
+    </nav>
+</body>
+</html>
+
+<?php
+session_start();
+
+// Proteksi halaman menggunakan session
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Form Penjualan Kantin</title>
+</head>
+<body>
+    <h2>Form Input Penjualan Kantin</h2>
+    <p><a href="dashboard.php">&laquo; Kembali ke Dashboard</a></p>
+
+    <form action="proses_penjualan.php" method="POST">
+        <div>
+            <label for="target_pendapatan">Target Pendapatan Harian (Rp):</label><br>
+            <input type="number" id="target_pendapatan" name="target_pendapatan" min="1" step="1" required>
+        </div>
+        <br>
+
+        <h3>Data Penjualan (4 Menu)</h3>
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Menu</th>
+                    <th>Harga Satuan (Rp)</th>
+                    <th>Jumlah Terjual (Porsi)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php for ($i = 1; $i <= 4; $i++): ?>
+                <tr>
+                    <td><?php echo $i; ?></td>
+                    <td>
+                        <input type="text" name="nama_menu<?php echo $i; ?>" required>
+                    </td>
+                    <td>
+                        <input type="number" name="harga<?php echo $i; ?>" min="1" step="1" required>
+                    </td>
+                    <td>
+                        <input type="number" name="jumlah<?php echo $i; ?>" min="0" step="1" value="0" required>
+                    </td>
+                </tr>
+                <?php endfor; ?>
+            </tbody>
+        </table>
+        <br>
+        <button type="submit">Proses Rekap Penjualan</button>
+    </form>
+</body>
+</html>
+
+
+<?php
+session_start();
+
+// Proteksi session & pemrosesan via metode POST saja
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: penjualan.php");
+    exit;
+}
+
+// Ambil data dari $_POST dan lakukan trim/validasi awal
+$target_pendapatan_raw = trim($_POST['target_pendapatan'] ?? '');
+
+$nama_menu = [];
+$harga     = [];
+$jumlah    = [];
+$errors    = [];
+
+for ($i = 1; $i <= 4; $i++) {
+    $nama_menu[$i] = trim($_POST["nama_menu$i"] ?? '');
+    $harga[$i]     = trim($_POST["harga$i"] ?? '');
+    $jumlah[$i]    = trim($_POST["jumlah$i"] ?? '');
+}
+
+// Validasi Data
+if ($target_pendapatan_raw === '' || !ctype_digit($target_pendapatan_raw) || (int)$target_pendapatan_raw <= 0) {
+    $errors[] = "Target pendapatan harian harus berupa bilangan bulat lebih dari nol.";
+}
+
+for ($i = 1; $i <= 4; $i++) {
+    if ($nama_menu[$i] === '') {
+        $errors[] = "Nama menu ke-$i tidak boleh kosong.";
+    }
+    if ($harga[$i] === '' || !ctype_digit($harga[$i]) || (int)$harga[$i] <= 0) {
+        $errors[] = "Harga satuan untuk menu ke-$i harus berupa bilangan bulat lebih dari nol.";
+    }
+    if ($jumlah[$i] === '' || !ctype_digit($jumlah[$i]) || (int)$jumlah[$i] < 0) {
+        $errors[] = "Jumlah porsi terjual untuk menu ke-$i harus berupa bilangan bulat minimal nol.";
+    }
+}
+
+// Jika terdapat error validasi, tampilkan pesan kesalahan
+if (!empty($errors)) {
+    echo "<h2>Terjadi Kesalahan Validasi Input</h2>";
+    echo "<ul style='color: red;'>";
+    foreach ($errors as $err) {
+        echo "<li>" . htmlspecialchars($err) . "</li>";
+    }
+    echo "</ul>";
+    echo "<p><a href='penjualan.php'>&laquo; Kembali ke Form Penjualan</a> | <a href='dashboard.php'>Dashboard</a></p>";
+    exit;
+}
+
+// Konversi ke tipe angka
+$target_pendapatan = (int)$target_pendapatan_raw;
+$total_porsi_terjual = 0;
+$total_pendapatan = 0;
+$penjualan_menu = [];
+
+for ($i = 1; $i <= 4; $i++) {
+    $h = (int)$harga[$i];
+    $j = (int)$jumlah[$i];
+    $subtotal = $h * $j;
+
+    $penjualan_menu[] = [
+        'nama'       => $nama_menu[$i],
+        'harga'      => $h,
+        'jumlah'     => $j,
+        'pendapatan' => $subtotal
+    ];
+
+    $total_porsi_terjual += $j;
+    $total_pendapatan += $subtotal;
+}
+
+// Perhitungan status dan selisih
+if ($total_pendapatan < $target_pendapatan) {
+    $status = "Target belum tercapai";
+    $selisih_val = $target_pendapatan - $total_pendapatan;
+    $selisih_text = "Kekurangan : Rp" . number_format($selisih_val, 0, ',', '.');
+    $pesan_evaluasi = "Target pendapatan belum tercapai. Evaluasi penjualan hari ini.";
+} elseif ($total_pendapatan == $target_pendapatan) {
+    $status = "Target tepat tercapai";
+    $selisih_text = "Selisih : Rp0";
+    $pesan_evaluasi = "Target pendapatan hari ini tepat tercapai.";
+} else {
+    $status = "Target terlampaui";
+    $selisih_val = $total_pendapatan - $target_pendapatan;
+    $selisih_text = "Kelebihan : Rp" . number_format($selisih_val, 0, ',', '.');
+    $pesan_evaluasi = "Pendapatan hari ini berhasil melampaui target.";
+}
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Hasil Rekap Penjualan Kantin</title>
+</head>
+<body>
+    <h2>Hasil Rekap Penjualan Kantin</h2>
+    <p><strong>Nama Petugas:</strong> <?php echo htmlspecialchars($_SESSION['nama']); ?></p>
+
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Nama Menu</th>
+                <th>Harga Satuan (Rp.)</th>
+                <th>Jumlah Terjual</th>
+                <th>Pendapatan (Rp.)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($penjualan_menu as $index => $item): ?>
+            <tr>
+                <td><?php echo $index + 1; ?></td>
+                <td><?php echo htmlspecialchars($item['nama']); ?></td>
+                <td><?php echo number_format($item['harga'], 0, ',', '.'); ?></td>
+                <td><?php echo $item['jumlah']; ?></td>
+                <td><?php echo number_format($item['pendapatan'], 0, ',', '.'); ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <br>
+    <p><strong>Target Pendapatan :</strong> Rp<?php echo number_format($target_pendapatan, 0, ',', '.'); ?></p>
+    <p><strong>Total Porsi :</strong> <?php echo $total_porsi_terjual; ?></p>
+    <p><strong>Total Pendapatan :</strong> Rp<?php echo number_format($total_pendapatan, 0, ',', '.'); ?></p>
+    <p><strong>Status :</strong> <?php echo $status; ?></p>
+    <p><strong><?php echo $selisih_text; ?></strong></p>
+    <p><em><?php echo $pesan_evaluasi; ?></em></p>
+
+    <hr>
+    <p>
+        <a href="penjualan.php">Input Penjualan Lagi</a> | 
+        <a href="dashboard.php">Kembali ke Dashboard</a>
+    </p>
+</body>
+</html>
+
+
+<?php
+session_start();
+
+// Hapus seluruh data session
+session_unset();
+session_destroy();
+
+// Arahkan ke halaman login dan hentikan script
+header("Location: login.php");
+exit;
+?>
